@@ -1,6 +1,9 @@
 from matplotlib import pyplot as plt
 
 plt.style.use(['seaborn-v0_8-white'])
+MARKERS = [
+    'o', 's', '^', 'D', 'v', 'p', '*', 'h', 'H', '+', 'x', 'd', '|', '_'
+]
 
 
 def save_fig_and_close(output_path):

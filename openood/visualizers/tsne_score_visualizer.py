@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from typing import Callable
 from .tsne_visualizer import TSNEVisualizer
-from openood.utils.vis_comm import save_fig_and_close
+from openood.utils.vis_comm import save_fig_and_close, MARKERS
 
 
 class TSNEScoreVisualizer(TSNEVisualizer):
@@ -27,12 +27,8 @@ class TSNEScoreVisualizer(TSNEVisualizer):
         else:
             norm = mcolors.Normalize(vmin=all_scores.min(),
                                      vmax=all_scores.max())
-        markers = [
-            'o', 's', '^', 'D', 'v', 'p', '*', 'h', 'H', '+', 'x', 'd', '|',
-            '_'
-        ]
         marker_dict = {
-            key: markers[i % len(markers)]
+            key: MARKERS[i % len(MARKERS)]
             for i, key in enumerate(feats_dict.keys())
         }
         for key, tsne_feats in tsne_feats_dict.items():
