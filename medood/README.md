@@ -1,8 +1,8 @@
 # MedOOD Datasets
 MedOOD is a comprehensive collection of medical datasets designed to benchmark and evaluate out-of-distribution (OOD)
 detection in the medical imaging domain. Building base on the [MedicOOD](https://github.com/benolmbrt/MedicOOD), MedOOD
-includes curated datasets from diverse medical imaging modalities, providing a robust foundation for developing and
-testing OOD detection models in real-world healthcare scenarios.
+includes curated datasets from diverse medical imaging modalities and other distributional shifts relevant to clinical
+practice, providing a robust foundation for developing and testing OOD detection models in real-world healthcare scenarios.
 
 
 ## Installation
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ## Preprocessing Datasets
 
 ### Preprocessing scripts
-After downloading the official datasets, you can preprocess them using the provided scripts in [scripts folder](scripts). 
+After downloading the official datasets, you can preprocess them using the provided scripts in [scripts folder](scripts).
 
 
 Don't forget to change the paths in the `scripts/common_env.sh` file.
@@ -65,8 +65,8 @@ anatomical template, resampling to an isotropic resolution of 1mm³, and skull-s
 We utilize only the [*Training*](https://www.cbica.upenn.edu/MICCAI_BraTS2020_TrainingData) split of this dataset, as
 only the training data include labels. This split contains 369 multimodal MRI scans: 293 HGG and 76 LGG.
 
-The T1-weighted MRIs serve as our in-distribution (ID) data, while the post-contrast T1-weighted and T2-FLAIR MRIs are 
-used as modality-shift out-of-distribution (OOD) data. Additionally, we generate a transformation-shifted OOD dataset by 
+The T1-weighted MRIs serve as our in-distribution (ID) data, while the post-contrast T1-weighted and T2-FLAIR MRIs are
+used as modality-shift out-of-distribution (OOD) data. Additionally, we generate a transformation-shifted OOD dataset by
 applying various transformations to the T1-weighted MRIs. The T2-weighted MRIs are reserved for use as validation data
 during the training of the OOD detection model.
 
@@ -209,10 +209,10 @@ We also recommend citing the individual datasets included in MedOOD:
 [4] Y. Suter et al., “The LUMIERE dataset: Longitudinal Glioblastoma MRI with expert RANO evaluation,” Sci Data, vol. 9, no. 1, Dec. 2022, doi: 10.1038/S41597-022-01881-7
 
 #### BraTS 2023 - Pediatric Tumors
-[5] A. F. Kazerooni et al., “The Brain Tumor Segmentation (BraTS) Challenge 2023: Focus on Pediatrics (CBTN-CONNECT-DIPGR-ASNR-MICCAI BraTS-PEDs),” ArXiv, p. arXiv:2305.17033v7, May 2023, Accessed: Jan. 07, 2025. [Online]. Available: http://arxiv.org/abs/2305.17033 
+[5] A. F. Kazerooni et al., “The Brain Tumor Segmentation (BraTS) Challenge 2023: Focus on Pediatrics (CBTN-CONNECT-DIPGR-ASNR-MICCAI BraTS-PEDs),” ArXiv, p. arXiv:2305.17033v7, May 2023, Accessed: Jan. 07, 2025. [Online]. Available: http://arxiv.org/abs/2305.17033
 
 #### BraTS 2023 - Sub-Sahara-Africa
-[6] M. Adewole et al., “The Brain Tumor Segmentation (BraTS) Challenge 2023: Glioma Segmentation in Sub-Saharan Africa Patient Population (BraTS-Africa),” ArXiv, p. arXiv:2305.19369v1, May 2023, Accessed: Jan. 07, 2025. [Online]. Available: https://pmc.ncbi.nlm.nih.gov/articles/PMC10312814/ 
+[6] M. Adewole et al., “The Brain Tumor Segmentation (BraTS) Challenge 2023: Glioma Segmentation in Sub-Saharan Africa Patient Population (BraTS-Africa),” ArXiv, p. arXiv:2305.19369v1, May 2023, Accessed: Jan. 07, 2025. [Online]. Available: https://pmc.ncbi.nlm.nih.gov/articles/PMC10312814/
 
 #### CQ500
 [7] S. Chilamkurthy et al., “Development and Validation of Deep Learning Algorithms for Detection of Critical Findings in Head CT Scans,” Mar. 2018, Accessed: Jan. 07, 2025. [Online]. Available: https://arxiv.org/abs/1803.05854v2
