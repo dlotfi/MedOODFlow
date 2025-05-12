@@ -24,6 +24,8 @@ from .mds_postprocessor import MDSPostprocessor
 from .mds_ensemble_postprocessor import MDSEnsemblePostprocessor
 from .mos_postprocessor import MOSPostprocessor
 from .nflow_postprocessor import NormalizingFlowPostprocessor
+from .nflow_typicality_postprocessor import \
+    NormalizingFlowTypicalityPostprocessor
 from .npos_postprocessor import NPOSPostprocessor
 from .odin_postprocessor import ODINPostprocessor
 from .opengan_postprocessor import OpenGanPostprocessor
@@ -92,6 +94,7 @@ def get_postprocessor(config: Config):
         'relation': RelationPostprocessor,
         't2fnorm': T2FNormPostprocessor,
         'nflow': NormalizingFlowPostprocessor,
+        'nflow_typicality': NormalizingFlowTypicalityPostprocessor,
     }
 
     return postprocessors[config.postprocessor.name](config)

@@ -22,6 +22,7 @@ from .med3d_trainer import Med3DTrainer
 from .mixup_trainer import MixupTrainer
 from .mos_trainer import MOSTrainer
 from .nflow_trainer import NormalizingFlowTrainer
+from .nflow_typicality_trainer import NormalizingFlowTypicalityTrainer
 from .npos_trainer import NPOSTrainer
 from .oe_trainer import OETrainer
 from .opengan_trainer import OpenGanTrainer
@@ -75,6 +76,7 @@ def get_trainer(net, train_loader: DataLoader, val_loader: DataLoader,
             't2fnorm': T2FNormTrainer,
             'reweightood': ReweightOODTrainer,
             'nflow': NormalizingFlowTrainer,
+            'nflow_typicality': NormalizingFlowTypicalityTrainer,
             'med3d': Med3DTrainer,
         }
         if config.trainer.name in ['cider', 'npos']:
