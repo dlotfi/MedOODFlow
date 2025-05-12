@@ -65,23 +65,42 @@ def get_normalizing_flow(network_config):
     clamp_method = network_config.clamp_method
     clamp_t = network_config.clamp_t
     n_flows = network_config.n_flows
+    flow_arch = network_config.arch
 
-    b = torch.Tensor([1 if i % 2 == 0 else 0 for i in range(latent_size)])
     flows = []
-    for i in range(n_flows):
-        s = ClampedMLP(clamp=clamp_value,
-                       method=clamp_method,
-                       layers=[latent_size, hidden_size, latent_size],
-                       init_zeros=True)
-        t = ClampedMLP(clamp=clamp_value,
-                       method=clamp_method if clamp_t else None,
-                       layers=[latent_size, hidden_size, latent_size],
-                       init_zeros=True)
-        if i % 2 == 0:
+    if flow_arch == 'RealNVP':
+        b = torch.Tensor([1 if i % 2 == 0 else 0 for i in range(latent_size)])
+        for i in range(n_flows):
+            s = ClampedMLP(clamp=clamp_value,
+                           method=clamp_method,
+                           layers=[latent_size, hidden_size, latent_size],
+                           init_zeros=True)
+            t = ClampedMLP(clamp=clamp_value,
+                           method=clamp_method if clamp_t else None,
+                           layers=[latent_size, hidden_size, latent_size],
+                           init_zeros=True)
+            if i % 2 == 0:
+                flows += [nf.flows.MaskedAffineFlow(b, t, s)]
+            else:
+                flows += [nf.flows.MaskedAffineFlow(1 - b, t, s)]
+            flows += [nf.flows.ActNorm(latent_size)]
+    elif flow_arch == 'Glow':
+        b = torch.zeros(latent_size)
+        b[:latent_size // 2] = 1
+        for i in range(n_flows):
+            s = ClampedMLP(clamp=clamp_value,
+                           method=clamp_method,
+                           layers=[latent_size, hidden_size, latent_size],
+                           init_zeros=True)
+            t = ClampedMLP(clamp=clamp_value,
+                           method=clamp_method if clamp_t else None,
+                           layers=[latent_size, hidden_size, latent_size],
+                           init_zeros=True)
             flows += [nf.flows.MaskedAffineFlow(b, t, s)]
-        else:
-            flows += [nf.flows.MaskedAffineFlow(1 - b, t, s)]
-        flows += [nf.flows.ActNorm(latent_size)]
+            flows += [nf.flows.mixing.InvertibleAffine(latent_size)]
+            flows += [nf.flows.ActNorm(latent_size)]
+    else:
+        raise ValueError(f'Unknown flow architecture: {flow_arch}')
 
     if l2_normalize:
         flows += [L2Norm(adjust_volume=False)]
