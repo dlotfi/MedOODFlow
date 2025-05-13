@@ -18,8 +18,8 @@ python main.py \
     --network.checkpoint "./results/brats20_t1_nflow_nflow_e100_lr0.0001_${MARK1}${MARK2}/s${SEED}/best_nflow.ckpt" None \
     --network.backbone.pretrained True \
     --network.backbone.checkpoint "./results/brats20_t1_resnet3d_18_med3d_e100_lr0.0001_default/s${SEED}/best.ckpt" \
-    --dataset.z_normalize_feat True \
-    --ood_dataset.z_normalize_feat True \
+    --dataset.z_normalize_feat False \
+    --ood_dataset.z_normalize_feat False \
     --seed ${SEED} \
     --mark ${MARK1}
 

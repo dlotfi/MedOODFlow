@@ -40,7 +40,7 @@ class TestNormalizingFlowPipeline:
             print('Using feature-based dataloader', flush=True)
         else:
             if bool(self.config.dataset.z_normalize_feat) or \
-               bool(self.config.ood.z_normalize_feat):
+               bool(self.config.ood_dataset.z_normalize_feat):
                 raise ValueError(
                     'Cannot z-normalize features when features '
                     'not provided! Specify "feat_root" in config.')
