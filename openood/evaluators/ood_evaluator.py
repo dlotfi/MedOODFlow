@@ -1,5 +1,6 @@
 import csv
 import os
+import shutil
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -51,6 +52,9 @@ class OODEvaluator(BaseEvaluator):
             net, id_data_loaders['test'])
         if self.config.recorder.save_scores:
             self._save_scores(id_pred, id_conf, id_gt, dataset_name)
+        if self.config.recorder.get('save_tail_samples', False):
+            self._save_tail_samples(id_data_loaders['test'], id_pred, id_conf,
+                                    id_gt, dataset_name)
 
         if fsood:
             # load csid data and compute confidence
@@ -62,6 +66,9 @@ class OODEvaluator(BaseEvaluator):
                 if self.config.recorder.save_scores:
                     self._save_scores(csid_pred, csid_conf, csid_gt,
                                       dataset_name)
+                if self.config.recorder.get('save_tail_samples', False):
+                    self._save_tail_samples(csid_dl, csid_pred, csid_conf,
+                                            csid_gt, dataset_name)
                 id_pred = np.concatenate([id_pred, csid_pred])
                 id_conf = np.concatenate([id_conf, csid_conf])
                 id_gt = np.concatenate([id_gt, csid_gt])
@@ -119,6 +126,9 @@ class OODEvaluator(BaseEvaluator):
             ood_gt = -1 * np.ones_like(ood_gt)  # hard set to -1 as ood
             if self.config.recorder.save_scores:
                 self._save_scores(ood_pred, ood_conf, ood_gt, dataset_name)
+            if self.config.recorder.get('save_tail_samples', False):
+                self._save_tail_samples(ood_dl, ood_pred, ood_conf, ood_gt,
+                                        dataset_name)
 
             pred = np.concatenate([id_pred, ood_pred])
             conf = np.concatenate([id_conf, ood_conf])
@@ -312,3 +322,66 @@ class OODEvaluator(BaseEvaluator):
                     k.append(x)
                     results.append(k)
             return results
+
+    def _save_tail_samples(self, dataloader: DataLoader, pred: np.ndarray,
+                           conf: np.ndarray, gt: np.ndarray,
+                           dataset_name: str):
+        imglist = []
+        for batch in dataloader:
+            if 'image_name' not in batch:
+                print(f"WARNING: 'image_name' not found in "
+                      f'batch for {dataset_name}')
+                return
+            for i, name in enumerate(batch['image_name']):
+                if 'image_path' in batch:
+                    imglist.append((name, batch['image_path'][i]))
+                else:
+                    imglist.append((name, None))
+        if len(imglist) != len(conf):
+            print(f"WARNING: Number of images ({len(imglist)}) doesn't match "
+                  f'number of scores ({len(conf)}) for {dataset_name}')
+            return
+        # Create rows with file path, confidence, prediction, and label
+        rows = []
+        for i, img in enumerate(imglist):
+            rows.append({
+                'image_name': img[0],
+                'image_path': img[1],
+                'score': float(conf[i]),
+                'pred': int(pred[i]),
+                'label': int(gt[i])
+            })
+        # Sort by confidence score
+        rows.sort(key=lambda x: x['score'], reverse=True)
+        # Save top and bottom 10%
+        sample_count = len(rows)
+        tail_size = max(int(sample_count * 0.1), 1)  # Ensure at least 1 sample
+        # Create dataset-specific directory
+        save_dir = os.path.join(self.config.output_dir, 'tail_samples',
+                                dataset_name)
+        os.makedirs(save_dir, exist_ok=True)
+        # Copy images and save top 10%
+        top_tail = rows[:tail_size]
+        output_path = os.path.join(save_dir, 'top_10p.csv')
+        self._copy_images_and_save_csv(top_tail, output_path)
+        # Copy images and save bottom 10%
+        bottom_tail = rows[-tail_size:]
+        bottom_tail.reverse()  # Reverse to have the lowest confidence first
+        output_path = os.path.join(save_dir, 'bottom_10p.csv')
+        self._copy_images_and_save_csv(bottom_tail, output_path)
+        print(f'Saved top and bottom 10% ({tail_size} samples each) '
+              f'for {dataset_name}')
+
+    @staticmethod
+    def _copy_images_and_save_csv(rows, csv_path):
+        columns = [k for k in rows[0].keys() if k != 'image_path']
+        with open(csv_path, mode='w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=columns)
+            writer.writeheader()
+            writer.writerows([{k: row[k] for k in columns} for row in rows])
+        dst_dir = os.path.dirname(csv_path)
+        if rows[0]['image_path'] is None:
+            return
+        for row in rows:
+            image_name = os.path.basename(row['image_name'])
+            shutil.copy2(row['image_path'], os.path.join(dst_dir, image_name))

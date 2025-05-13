@@ -74,6 +74,7 @@ class Med3DImglistDataset(BaseDataset, Randomizable):
         path = os.path.join(self.data_dir, image_name)
         sample = dict()
         sample['image_name'] = image_name
+        sample['image_path'] = path
         kwargs = {'name': self.name, 'path': path, 'tokens': tokens}
         try:
             # some preprocessor methods require setup
