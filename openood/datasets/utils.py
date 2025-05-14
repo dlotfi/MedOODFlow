@@ -31,8 +31,11 @@ def get_dataloader(config: Config):
         split_config = dataset_config[split]
         preprocessor = get_preprocessor(config, split)
         # weak augmentation for data_aux
-        data_aux_preprocessor = TestStandardPreProcessor(config) \
-            if split_config.dataset_class != 'Med3DImglistDataset' else None
+        if split_config.dataset_class == 'Med3DImglistDataset':
+            # data_aux_preprocessor = Med3DTestPreprocessor(config)
+            data_aux_preprocessor = None  # for computational efficiency
+        else:
+            data_aux_preprocessor = TestStandardPreProcessor(config)
 
         if split_config.dataset_class == 'ImglistExtraDataDataset':
             dataset = ImglistExtraDataDataset(
@@ -82,7 +85,8 @@ def get_dataloader(config: Config):
                 data_dir=split_config.data_dir,
                 num_classes=dataset_config.num_classes,
                 num_channels=dataset_config.num_channels,
-                preprocessor=preprocessor)
+                preprocessor=preprocessor,
+                data_aux_preprocessor=data_aux_preprocessor)
             dataloader = MonaiDataLoader(
                 dataset=dataset,
                 batch_size=split_config.batch_size,
@@ -125,12 +129,14 @@ def get_ood_dataloader(config: Config):
     def _get_loader(name, imglist_pth, data_dir, preprocessor,
                     data_aux_preprocessor):
         if ood_config.dataset_class == 'Med3DImglistDataset':
-            dataset = Med3DImglistDataset(name=name,
-                                          imglist_pth=imglist_pth,
-                                          data_dir=data_dir,
-                                          num_classes=ood_config.num_classes,
-                                          num_channels=ood_config.num_channels,
-                                          preprocessor=preprocessor)
+            dataset = Med3DImglistDataset(
+                name=name,
+                imglist_pth=imglist_pth,
+                data_dir=data_dir,
+                num_classes=ood_config.num_classes,
+                num_channels=ood_config.num_channels,
+                preprocessor=preprocessor,
+                data_aux_preprocessor=data_aux_preprocessor)
             dataloader = MonaiDataLoader(dataset=dataset,
                                          batch_size=ood_config.batch_size,
                                          shuffle=ood_config.shuffle,

@@ -20,6 +20,7 @@ class Med3DImglistDataset(BaseDataset, Randomizable):
                  data_dir: str,
                  num_classes: int,
                  preprocessor: Callable,
+                 data_aux_preprocessor: Callable,
                  maxlen: int = None,
                  dummy_read: bool = False,
                  dummy_size: bool = None,
@@ -40,6 +41,7 @@ class Med3DImglistDataset(BaseDataset, Randomizable):
         self.num_channels = num_channels
         self.preprocessor = preprocessor
         self.transform_image = preprocessor
+        self.transform_aux_image = data_aux_preprocessor
         self.maxlen = maxlen
         self.dummy_read = dummy_read
         self.dummy_size = dummy_size
@@ -96,19 +98,21 @@ class Med3DImglistDataset(BaseDataset, Randomizable):
                 # apply the transforms
                 if isinstance(self.transform_image, Randomizable):
                     self.transform_image.set_random_state(seed=self._seed)
+                if isinstance(self.transform_aux_image, Randomizable):
+                    self.transform_aux_image.set_random_state(seed=self._seed)
 
                 if self.transform_with_metadata:
-                    image, meta_data = apply_transform(self.transform_image,
-                                                       (image, meta_data),
-                                                       map_items=False,
-                                                       unpack_items=True)
-                    sample['meta_data'] = meta_data
+                    sample['data'], sample['meta_data'] = apply_transform(
+                        self.transform_image, (image, meta_data),
+                        map_items=False,
+                        unpack_items=True)
                 else:
-                    image = apply_transform(self.transform_image,
-                                            image,
-                                            map_items=False)
-
-                sample['data'] = image
+                    sample['data'] = apply_transform(self.transform_image,
+                                                     image,
+                                                     map_items=False)
+                if self.transform_aux_image is not None:
+                    sample['data_aux'] = apply_transform(
+                        self.transform_aux_image, image, map_items=False)
             extras = ast.literal_eval(extra_str)
             try:
                 for key, value in extras.items():
