@@ -12,6 +12,7 @@ from .bit import KNOWN_MODELS
 from .conf_branch_net import ConfBranchNet
 from .csi_net import get_csi_linear_layers, CSINet
 from .cider_net import CIDERNet
+from .identity import IdentityNetwork
 from .resnet3d import ResNet3D_18
 from .t2fnorm_net import T2FNormNet
 from .de_resnet18_256x256 import AttnBasicBlock, BN_layer, De_ResNet18_256x256
@@ -45,7 +46,10 @@ def get_network(network_config):
 
     num_classes = network_config.num_classes
 
-    if network_config.name == 'resnet3d_18':
+    if network_config.name == 'identity':
+        net = IdentityNetwork(num_classes=num_classes)
+
+    elif network_config.name == 'resnet3d_18':
         net = ResNet3D_18(num_classes=num_classes,
                           in_channels=network_config.num_channels,
                           pretrained=network_config.pretrained
@@ -406,11 +410,12 @@ def get_network(network_config):
         os.environ['TORCH_FORCE_WEIGHTS_ONLY_LOAD'] = '1'
         if type(net) is dict:
             if isinstance(network_config.checkpoint, list):
-                for subnet, checkpoint in zip(net.values(),
-                                              network_config.checkpoint):
-                    if checkpoint not in {None, 'none'}:
-                        subnet.load_state_dict(torch.load(checkpoint),
-                                               strict=False)
+                for subnet, ckpt in zip(net.values(),
+                                        network_config.checkpoint):
+                    if ckpt not in {None, 'none'}:
+                        ckpt = torch.load(ckpt)
+                        subnet.load_state_dict(ckpt, strict=False)
+                        warn_missing_keys(subnet, ckpt)
             elif isinstance(network_config.checkpoint, str):
                 ckpt = torch.load(network_config.checkpoint)
                 subnet_ckpts = {k: {} for k in net.keys()}
@@ -433,28 +438,25 @@ def get_network(network_config):
             pass
         else:
             try:
-                checkpoint = torch.load(network_config.checkpoint)
+                ckpt = torch.load(network_config.checkpoint)
                 if network_config.checkpoint_key not in {None, 'none'}:
-                    checkpoint = checkpoint[network_config.checkpoint_key]
-                net.load_state_dict(checkpoint, strict=True)
+                    ckpt = ckpt[network_config.checkpoint_key]
+                net.load_state_dict(ckpt, strict=True)
             except RuntimeError:
                 print(
                     'Could not load model in strict mode. Trying non-strict.')
                 # sometimes 'fc' should not be loaded
-                if 'fc.weight' in checkpoint:
+                if 'fc.weight' in ckpt:
                     print('"fc" weights were ignored.')
-                    checkpoint.pop('fc.weight')
-                    checkpoint.pop('fc.bias')
+                    ckpt.pop('fc.weight')
+                    ckpt.pop('fc.bias')
                 # and sometimes 'fc' has been saved as 'linear'
-                elif 'linear.weight' in checkpoint:
+                elif 'linear.weight' in ckpt:
                     print('"linear" weights used as "fc".')
-                    checkpoint['fc.weight'] = checkpoint.pop('linear.weight')
-                    checkpoint['fc.bias'] = checkpoint.pop('linear.bias')
-                net.load_state_dict(checkpoint, strict=False)
-                missing_keys = \
-                    set(net.state_dict().keys()) - set(checkpoint.keys())
-                if missing_keys:
-                    print('WARNING: Missing keys: ', missing_keys)
+                    ckpt['fc.weight'] = ckpt.pop('linear.weight')
+                    ckpt['fc.bias'] = ckpt.pop('linear.bias')
+                net.load_state_dict(ckpt, strict=False)
+                warn_missing_keys(net, ckpt)
         print('Model Loading {} Completed!'.format(network_config.name))
 
     if network_config.num_gpus > 1:
@@ -479,3 +481,11 @@ def get_network(network_config):
 
     # cudnn.benchmark = True
     return net
+
+
+def warn_missing_keys(net, ckpt):
+    missing_in_net = set(ckpt.keys()) - set(net.state_dict().keys())
+    missing_in_ckpt = set(net.state_dict().keys()) - set(ckpt.keys())
+    if missing_in_net or missing_in_ckpt:
+        print('WARNING: Missing keys in net:', missing_in_net)
+        print('WARNING: Missing keys in checkpoint:', missing_in_ckpt)

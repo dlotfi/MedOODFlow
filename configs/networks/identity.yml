@@ -1,0 +1,7 @@
+network:
+  name: identity
+  num_classes: '@{dataset.num_classes}'
+  pretrained: False
+  checkpoint: none
+  checkpoint_key: none
+  num_gpus: '@{num_gpus}'
