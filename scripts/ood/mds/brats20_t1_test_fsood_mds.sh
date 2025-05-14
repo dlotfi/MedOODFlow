@@ -3,6 +3,9 @@
 
 PYTHONPATH='.':$PYTHONPATH \
 
+# Uncomment the following line if you get "received 0 items of ancdata" error
+# ulimit -n 2048
+
 python main.py \
     --config configs/datasets/medood/brats20_t1.yml \
     configs/datasets/medood/brats20_t1_fsood.yml \
