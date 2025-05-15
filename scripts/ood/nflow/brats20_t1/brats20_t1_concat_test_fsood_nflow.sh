@@ -52,5 +52,6 @@ python main.py \
 #    --network.backbone.pretrained False \
 #    --network.backbone.encoder.pretrained True \
 #    --network.backbone.encoder.checkpoint "./results/brats20_t1_resnet3d_18_med3d_e100_lr0.0001_default/s${SEED}/best.ckpt" \
+#    --recorder.save_tail_samples True \
 #    --seed ${SEED} \
 #    --mark ${MARK}
