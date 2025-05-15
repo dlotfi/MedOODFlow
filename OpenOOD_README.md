@@ -39,7 +39,7 @@ Comments, issues, contributions, and collaborations are all welcomed!
 
 ## Updates
 - **06 Nov, 2024**: OpenOOD `v1.5` full paper is accepted to The Journal of Data-centric Machine Learning Research (DMLR).
-- **17 Aug, 2024**: :bulb::bulb: Wondering how OOD detection evolves and what new research topics could be in the new era of *multimodal LLMs*? Don't hesistate to check out our recent work [Unsolvable Problem Detection: Evaluating Trustworthiness of Vision Language Models](https://github.com/AtsuMiyai/UPD) and [Generalized Out-of-Distribution Detection and Beyond in Vision Language Model Era: A Survey](https://github.com/AtsuMiyai/Awesome-OOD-VLM).  
+- **17 Aug, 2024**: :bulb::bulb: Wondering how OOD detection evolves and what new research topics could be in the new era of *multimodal LLMs*? Don't hesistate to check out our recent work [Unsolvable Problem Detection: Evaluating Trustworthiness of Vision Language Models](https://github.com/AtsuMiyai/UPD) and [Generalized Out-of-Distribution Detection and Beyond in Vision Language Model Era: A Survey](https://github.com/AtsuMiyai/Awesome-OOD-VLM).
 - **27 Oct, 2023**: A short version of OpenOOD `v1.5` is accepted to [NeurIPS 2023 Workshop on Distribution Shifts](https://sites.google.com/view/distshift2023/home?authuser=0) as an oral presentation. You may want to check out our [presentation slides](https://drive.google.com/file/d/1rnjTR0ho_hNhxR4TXgNRjdJf73rS8zHO/view?usp=sharing).
 - **25 Sept, 2023**: OpenOOD now supports OOD detection with foundation models including zero-shot CLIP and DINOv2 linear probe. Check out the example evaluation script [here](https://github.com/Jingkang50/OpenOOD/blob/main/scripts/eval_ood_imagenet_foundation_models.py).
 - **16 June, 2023**: :boom::boom: We are releasing OpenOOD `v1.5`, which includes the following exciting updates. A detailed changelog is provided in the [Wiki](https://github.com/Jingkang50/OpenOOD/wiki/OpenOOD-v1.5-change-log). An overview of the supported methods and benchmarks (with paper links) is available [here](https://github.com/Jingkang50/OpenOOD/wiki/OpenOOD-v1.5-methods-&-benchmarks-overview).
@@ -225,7 +225,7 @@ reconstruction: c2e2de,
 classification: fdd7e6,
 distance: f4d5b3 -->
 
-> Post-Hoc Methods (23):
+> Post-Hoc Methods (24):
 > - [x] [![msp](https://img.shields.io/badge/ICLR'17-MSP-fdd7e6?style=for-the-badge)](https://openreview.net/forum?id=Hkg4TI9xl)
 > - [x] [![odin](https://img.shields.io/badge/ICLR'18-ODIN-fdd7e6?style=for-the-badge)](https://openreview.net/forum?id=H1VGkIxRZ) &nbsp;&nbsp; ![postprocess]
 > - [x] [![mds](https://img.shields.io/badge/NeurIPS'18-MDS-f4d5b3?style=for-the-badge)](https://papers.nips.cc/paper/2018/hash/abdeb6f575ac5c6676b747bca8d09cc2-Abstract.html) &nbsp;&nbsp; ![postprocess]
@@ -249,6 +249,10 @@ distance: f4d5b3 -->
 > - [x] [![relation](https://img.shields.io/badge/NEURIPS'23-Relation-fdd7e6?style=for-the-badge)](https://arxiv.org/abs/2301.12321) &nbsp;&nbsp; ![postprocess]
 > - [x] [![scale](https://img.shields.io/badge/ICLR'24-Scale-fdd7e6?style=for-the-badge)](https://github.com/kai422/SCALE) &nbsp;&nbsp; ![postprocess]
 > - [x] [![fdbd](https://img.shields.io/badge/ICML'24-fDBD-f4d5b3?style=for-the-badge)](https://github.com/litianliu/fDBD-OOD) &nbsp;&nbsp; ![postprocess]
+> - [x] [![adascale-a](https://img.shields.io/badge/arXiv'25-AdaScale\_A-fdd7e6?style=for-the-badge)](https://github.com/sudarshanregmi/adascale) &nbsp;&nbsp; ![postprocess]
+> - [x] [![adascale-l](https://img.shields.io/badge/arXiv'25-AdaScale\_L-fdd7e6?style=for-the-badge)](https://github.com/sudarshanregmi/adascale) &nbsp;&nbsp; ![postprocess]
+> - [x] [![ascood](https://img.shields.io/badge/arXiv'25-iODIN-fdd7e6?style=for-the-badge)](https://github.com/sudarshanregmi/ASCOOD) &nbsp;&nbsp; ![postprocess]
+> - [x] [![nci](https://img.shields.io/badge/CVPR'25-NCI-fdd7e6?style=for-the-badge)](https://arxiv.org/pdf/2311.01479) &nbsp;&nbsp; ![postprocess]
 
 > Training Methods (14):
 > - [x] [![confbranch](https://img.shields.io/badge/arXiv'18-ConfBranch-fdd7e6?style=for-the-badge)](https://github.com/uoguelph-mlrg/confidence_estimation) &nbsp;&nbsp; ![preprocess] &nbsp; ![training]
@@ -265,6 +269,7 @@ distance: f4d5b3 -->
 > - [x] [![ish](https://img.shields.io/badge/ICLR'24-ish-fdd7e6?style=for-the-badge)](https://github.com/kai422/SCALE) &nbsp;&nbsp; ![training]
 > - [x] [![palm](https://img.shields.io/badge/ICLR'24-PALM-f4d5b3?style=for-the-badge)](https://github.com/jeff024/PALM) &nbsp;&nbsp; ![training]
 > - [x] [![reweightood](https://img.shields.io/badge/CVPRW'24-ReweightOOD-f4d5b3?style=for-the-badge)](https://github.com/sudarshanregmi/ReweightOOD) &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
+> - [x] [![ascood](https://img.shields.io/badge/arXiv'25-ASCOOD-fdd7e6?style=for-the-badge)](https://github.com/sudarshanregmi/ASCOOD) &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
 
 > Training With Extra Data (4):
 > - [x] [![oe](https://img.shields.io/badge/ICLR'19-OE-fdd7e6?style=for-the-badge)](https://openreview.net/forum?id=HyxCxhRcY7) &nbsp;&nbsp; ![extradata] &nbsp; ![training]
