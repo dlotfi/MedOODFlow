@@ -23,6 +23,19 @@ python main.py \
     --seed ${SEED} \
     --mark ${MARK1}
 
+# feature sampling
+python main.py \
+    --config configs/datasets/medood/brats20_t1.yml \
+    configs/networks/nflow_resnet3d_18_feat_concat.yml \
+    configs/pipelines/test/feat_sample_nflow.yml \
+    --network.pretrained True \
+    --network.checkpoint "./results/brats20_t1_nflow_nflow_e100_lr0.0001_${MARK1}/s${SEED}/best_nflow.ckpt" None \
+    --network.nflow.l2_normalize False \
+    --pipeline.num_samples 100 \
+    --pipeline.save_name "Flow" \
+    --seed ${SEED} \
+    --mark ${MARK1}
+
 # draw plots
 python main.py \
     --config configs/datasets/medood/brats20_t1.yml \
@@ -31,6 +44,7 @@ python main.py \
     --visualizer.ood_scheme fsood \
     --visualizer.score_dir "./results/brats20_t1_nflow_test_nflow_ood_nflow_${MARK1}${MARK2}/s${SEED}/fsood/scores" \
     --visualizer.feat_dir "./results/brats20_t1_nflow_feat_extract_nflow_${MARK1}/s${SEED}" \
+    --visualizer.extra_feats "./results/brats20_t1_nflow_feat_sample_nflow_${MARK1}/s${SEED}/Flow.npz" None \
     --visualizer.ood_splits transformation_shift population_shift modality_shift diagnostic_shift organ_shift \
     --visualizer.spectrum.types all splits \
     --visualizer.spectrum.score_outlier_removal.method range \

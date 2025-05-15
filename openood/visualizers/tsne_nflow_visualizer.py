@@ -25,6 +25,10 @@ class TSNEFlowVisualizer(TSNEVisualizer):
             feats_dict[split_name] = feats
             feats_flow_dict[split_name] = feats_flow
 
+        # Add extra feature files if specified
+        extra_feats_dict = self.load_extra_features(n_samples)
+        feats_dict.update(extra_feats_dict)
+
         print(
             'Plotting t-SNE for features of the backbone '
             'and normalizing flow',
@@ -36,8 +40,10 @@ class TSNEFlowVisualizer(TSNEVisualizer):
                 'ID and OOD Samples'
         output_path = os.path.join(output_dir,
                                    f'tsne_features{file_suffix}.svg')
-        self.draw_tsne_plot(feats_dict, title, output_path, self.get_label)
+        self.draw_tsne_plot(feats_dict, title, output_path,
+                            self.get_dataset_label)
         self.draw_tsne_plot(
             feats_flow_dict,
             't-SNE for Normalizing Flow Features of ID and OOD Samples',
-            os.path.join(output_dir, 'tsne_features_flow.svg'), self.get_label)
+            os.path.join(output_dir,
+                         'tsne_features_flow.svg'), self.get_dataset_label)

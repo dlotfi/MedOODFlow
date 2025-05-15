@@ -3,6 +3,7 @@ from openood.utils import Config
 from .feat_extract_pipeline import FeatExtractPipeline
 from .feat_extract_opengan_pipeline import FeatExtractOpenGANPipeline
 from .feat_extract_nflow_pipeline import FeatExtractNormalizingFlowPipeline
+from .feat_sample_nflow_pipeline import FeatSampleNormalizingFlowPipeline
 from .finetune_pipeline import FinetunePipeline
 from .test_acc_pipeline import TestAccPipeline
 from .test_ad_pipeline import TestAdPipeline
@@ -29,6 +30,7 @@ def get_pipeline(config: Config):
         'feat_extract': FeatExtractPipeline,
         'feat_extract_opengan': FeatExtractOpenGANPipeline,
         'feat_extract_nflow': FeatExtractNormalizingFlowPipeline,
+        'feat_sample_nflow': FeatSampleNormalizingFlowPipeline,
         'test_ood': TestOODPipeline,
         'test_nflow': TestNormalizingFlowPipeline,
         'test_ad': TestAdPipeline,

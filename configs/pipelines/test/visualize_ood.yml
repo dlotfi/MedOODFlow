@@ -16,6 +16,7 @@ pipeline:
 visualizer:
   score_dir: ./results/cifar10_test_ood_default/s0/ood/scores
   feat_dir: ./results/cifar10_feat_extract_default
+  extra_feats: []
   ood_splits: [nearood, farood]
   ood_scheme: ood
 

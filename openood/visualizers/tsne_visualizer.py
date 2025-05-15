@@ -122,6 +122,10 @@ class TSNEVisualizer(BaseVisualizer):
                                        n_samples=n_samples)
             feats_dict[split_name] = feats
 
+        # Add extra feature files if specified
+        extra_feats_dict = self.load_extra_features(n_samples)
+        feats_dict.update(extra_feats_dict)
+
         print('Plotting t-SNE for features of the backbone', flush=True)
         title_suffix, file_suffix = self.get_title_and_file_suffix(
             l2_normalize_feat, z_normalize_feat)

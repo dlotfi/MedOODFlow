@@ -21,6 +21,19 @@ python main.py \
     --seed ${SEED} \
     --mark ${MARK1}
 
+# feature sampling
+python main.py \
+    --config configs/datasets/medmnist/organamnist.yml \
+    configs/networks/nflow_resnet18_28x28_feat_concat.yml \
+    configs/pipelines/test/feat_sample_nflow.yml \
+    --network.pretrained True \
+    --network.checkpoint "./results/organamnist_nflow_nflow_e100_lr0.0001_${MARK1}${MARK2}/s${SEED}/best_nflow.ckpt" None \
+    --network.nflow.l2_normalize False \
+    --pipeline.num_samples 1000 \
+    --pipeline.save_name "Flow" \
+    --seed ${SEED} \
+    --mark ${MARK1}
+
 # draw plots
 python main.py \
     --config configs/datasets/medmnist/organamnist.yml \
@@ -29,6 +42,7 @@ python main.py \
     --visualizer.ood_scheme ood \
     --visualizer.score_dir "./results/organamnist_nflow_test_nflow_ood_nflow_${MARK1}${MARK2}/s${SEED}/ood/scores" \
     --visualizer.feat_dir "./results/organamnist_nflow_feat_extract_nflow_${MARK1}/s${SEED}" \
+    --visualizer.extra_feats "./results/organamnist_nflow_feat_sample_nflow_${MARK1}/s${SEED}/Flow.npz" None \
     --visualizer.ood_splits nearood farood \
     --visualizer.spectrum.types all splits \
     --visualizer.spectrum.score_log_scale False \
@@ -36,7 +50,9 @@ python main.py \
     --visualizer.spectrum.score_outlier_removal.keep_range -1000 inf \
     --visualizer.tsne.types all splits \
     --visualizer.tsne.z_normalize_feat False \
+    --visualizer.tsne.l2_normalize_feat True \
     --visualizer.tsne_score.types all splits \
     --visualizer.tsne_score.z_normalize_feat False \
+    --visualizer.tsne_score.l2_normalize_feat True \
     --seed ${SEED} \
     --mark ${MARK1}${MARK2}
