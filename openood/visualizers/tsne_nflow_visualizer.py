@@ -29,19 +29,24 @@ class TSNEFlowVisualizer(TSNEVisualizer):
         extra_feats_dict = self.load_extra_features(n_samples)
         feats_dict.update(extra_feats_dict)
 
-        print(
-            'Plotting t-SNE for features of the backbone '
-            'and normalizing flow',
-            flush=True)
+        # Get feature_splits from config if available
+        feature_splits = getattr(self.plot_config, 'feature_splits', [])
+        feature_splits = [int(size) for size in feature_splits]
+        # Handle regular features like TSNEVisualizer
+        if len(feature_splits) > 0:
+            split_feats_list = self._split_features(feats_dict, feature_splits)
+            for i, split_feats in enumerate(split_feats_list):
+                self.plot_tsne_features(split_feats,
+                                        l2_normalize_feat,
+                                        z_normalize_feat,
+                                        output_dir,
+                                        segment_index=i + 1)
+        # Original behavior for full features
+        self.plot_tsne_features(feats_dict, l2_normalize_feat,
+                                z_normalize_feat, output_dir)
 
-        title_suffix, file_suffix = self.get_title_and_file_suffix(
-            l2_normalize_feat, z_normalize_feat)
-        title = f't-SNE for{title_suffix} Backbone Features of ' \
-                'ID and OOD Samples'
-        output_path = os.path.join(output_dir,
-                                   f'tsne_features{file_suffix}.svg')
-        self.draw_tsne_plot(feats_dict, title, output_path,
-                            self.get_dataset_label)
+        # Handle flow features with original logic
+        print('Plotting t-SNE for normalizing flow features', flush=True)
         self.draw_tsne_plot(
             feats_flow_dict,
             't-SNE for Normalizing Flow Features of ID and OOD Samples',

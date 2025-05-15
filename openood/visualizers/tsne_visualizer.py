@@ -105,6 +105,24 @@ class TSNEVisualizer(BaseVisualizer):
         plt.title(title)
         save_fig_and_close(output_path)
 
+    @staticmethod
+    def _split_features(feats_dict: Dict[str, np.array],
+                        feature_sizes: List[int]):
+        split_feats_list = []
+        total_size = sum(feature_sizes)
+        start_idx = 0
+        for size in feature_sizes:
+            split_dict = {}
+            for key, feats in feats_dict.items():
+                if feats.shape[1] < total_size:
+                    raise ValueError(
+                        f'Feature dimension {feats.shape[1]} is smaller '
+                        f'than sum of split sizes {total_size}')
+                split_dict[key] = feats[:, start_idx:start_idx + size]
+            split_feats_list.append(split_dict)
+            start_idx += size
+        return split_feats_list
+
     def plot_tsne(self):
         output_dir = self.config.output_dir
         l2_normalize_feat = self.plot_config.l2_normalize_feat
@@ -125,14 +143,46 @@ class TSNEVisualizer(BaseVisualizer):
         # Add extra feature files if specified
         extra_feats_dict = self.load_extra_features(n_samples)
         feats_dict.update(extra_feats_dict)
+        # Get feature_splits from config if available
+        feature_splits = getattr(self.plot_config, 'feature_splits', [])
+        feature_splits = [int(size) for size in feature_splits]
+        # If feature_splits is defined, create separate t-SNE plots for each
+        if len(feature_splits) > 0:
+            split_feats_list = self._split_features(feats_dict, feature_splits)
+            for i, split_feats in enumerate(split_feats_list):
+                self.plot_tsne_features(split_feats,
+                                        l2_normalize_feat,
+                                        z_normalize_feat,
+                                        output_dir,
+                                        segment_index=i + 1)
+        # Original behavior for full features
+        self.plot_tsne_features(feats_dict, l2_normalize_feat,
+                                z_normalize_feat, output_dir)
 
-        print('Plotting t-SNE for features of the backbone', flush=True)
+    def plot_tsne_features(self,
+                           feats_dict,
+                           l2_normalize_feat,
+                           z_normalize_feat,
+                           output_dir,
+                           segment_index=None):
         title_suffix, file_suffix = self.get_title_and_file_suffix(
             l2_normalize_feat, z_normalize_feat)
-        title = f't-SNE for{title_suffix} Backbone ' \
-                'Features of ID and OOD Samples'
-        output_path = os.path.join(output_dir,
-                                   f'tsne_features{file_suffix}.svg')
+        if segment_index is not None:
+            print(
+                f'Plotting t-SNE for segment {segment_index} features '
+                f'of the backbone',
+                flush=True)
+            title = f't-SNE for{title_suffix} Backbone Features ' \
+                    f'(Segment {segment_index}) of ID and OOD Samples'
+            output_path = os.path.join(
+                output_dir,
+                f'tsne_features{file_suffix}_segment_{segment_index}.svg')
+        else:
+            print('Plotting t-SNE for features of the backbone', flush=True)
+            title = f't-SNE for{title_suffix} Backbone ' \
+                    'Features of ID and OOD Samples'
+            output_path = os.path.join(output_dir,
+                                       f'tsne_features{file_suffix}.svg')
         self.draw_tsne_plot(feats_dict, title, output_path, self.get_label)
 
     def plot_tsne_split(self):
