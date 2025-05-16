@@ -110,25 +110,21 @@ class TSNEScoreVisualizer(TSNEVisualizer):
         feats_dict = {}
         scores_dict = {}
         for split_name, dataset_list in self.datasets.items():
-            if split_name in self.id_splits:
-                dataset_list = [dataset_list]
             for dataset in dataset_list:
-                dataset = [dataset] if type(dataset) is not list else dataset
-                feats = self.load_features([f'{d}.npz' for d in dataset],
+                feats = self.load_features([f'{dataset}.npz'],
                                            separate=True,
                                            l2_normalize=l2_normalize_feat,
                                            z_normalize=z_normalize_feat)
-                scores = self.load_scores([f'{d}.npz' for d in dataset],
-                                          separate=True)
+                scores = self.load_scores([f'{dataset}.npz'], separate=True)
                 scores, feats = self.random_sample([scores, feats],
-                                                   array_names=dataset,
+                                                   array_names=[dataset],
                                                    n_samples=n_samples)
                 if split_name in self.id_splits:
                     id_feats_dict[split_name] = feats
                     id_scores_dict[split_name] = scores
                 else:
-                    feats_dict.setdefault(split_name, {})[dataset[0]] = feats
-                    scores_dict.setdefault(split_name, {})[dataset[0]] = scores
+                    feats_dict.setdefault(split_name, {})[dataset] = feats
+                    scores_dict.setdefault(split_name, {})[dataset] = scores
 
         # Plot t-SNE with scores for all pairs of 'id'
         # and one of the other datasets
@@ -157,5 +153,5 @@ class TSNEScoreVisualizer(TSNEVisualizer):
             print(f'\n{" Overall ":-^50}', flush=True)
             self.plot_tsne_score()
         if 'splits' in self.plot_config.types:
-            print(f'\n{" Split ":-^50}', flush=True)
+            print(f'\n{" Splits ":-^50}', flush=True)
             self.plot_tsne_score_split()

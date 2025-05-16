@@ -22,11 +22,11 @@ visualizer:
 
   plots: [spectrum, tsne_nflow, tsne_score]
   spectrum:
-    types: [all]  # how to plot OODs against ID (and CS-ID) choices: [all, splits]
-    n_bins: 500 # number of bins for the histogram
+    types: [all]  # how to plot OODs against ID (and CS-ID) choices: [all, splits, datasets]
+    n_bins: auto # number of bins for the histogram ('auto' for automatic estimation of the number of bins)
     score_log_scale: False  # log-scale the score values in the plot
     score_outlier_removal:
-      method: auto  # choices: [auto, zscore, iqr, mad, range]
+      method: auto  # choices: [none, auto, zscore, iqr, mad, range]
       keep_range: [-inf, inf]  # range to keep the scores. only used when method is 'range'
       sigma: 3
       keep_ratio_threshold: 0.5

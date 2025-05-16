@@ -196,23 +196,20 @@ class TSNEVisualizer(BaseVisualizer):
         id_feats_dict = {}
         feats_dict = {}
         for split_name, dataset_list in self.datasets.items():
-            if split_name in self.id_splits:
-                dataset_list = [dataset_list]
             for dataset in dataset_list:
-                dataset = [dataset] if type(dataset) is not list else dataset
-                feats = self.load_features([f'{d}.npz' for d in dataset],
+                feats = self.load_features([f'{dataset}.npz'],
                                            separate=True,
                                            l2_normalize=l2_normalize_feat,
                                            z_normalize=z_normalize_feat)
                 feats = self.random_sample([feats],
-                                           array_names=dataset,
+                                           array_names=[dataset],
                                            n_samples=n_samples)
                 if split_name in self.id_splits:
                     id_feats_dict[split_name] = feats
                 else:
-                    feats_dict.setdefault(split_name, {})[dataset[0]] = feats
+                    feats_dict.setdefault(split_name, {})[dataset] = feats
 
-        # Plot t-SNE for all pairs of 'id' and one of the other datasets
+        # Plot OOD datasets of each split against ID
         for split_name, datasets_feats in feats_dict.items():
             print(f'Plotting t-SNE for {split_name}', flush=True)
             combined_feats_dict = {**id_feats_dict, **datasets_feats}
@@ -225,10 +222,59 @@ class TSNEVisualizer(BaseVisualizer):
             self.draw_tsne_plot(combined_feats_dict, title, output_path,
                                 self.get_dataset_label)
 
+    def plot_tsne_dataset(self):
+        output_dir = os.path.join(self.config.output_dir, 'dataset_plots')
+        l2_normalize_feat = self.plot_config.l2_normalize_feat
+        z_normalize_feat = self.plot_config.z_normalize_feat
+        n_samples = self.plot_config.n_samples
+
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Load ID features
+        id_feats_dict = {}
+        for split_name in self.id_splits:
+            dataset_list = self.datasets[split_name]
+            feats = self.load_features([f'{d}.npz' for d in dataset_list],
+                                       separate=True,
+                                       l2_normalize=l2_normalize_feat,
+                                       z_normalize=z_normalize_feat)
+            feats = self.random_sample([feats],
+                                       array_names=dataset_list,
+                                       n_samples=n_samples)
+            id_feats_dict[split_name] = feats
+
+        # Load and plot each OOD dataset against ID
+        for split_name, dataset_list in self.datasets.items():
+            if split_name in self.id_splits:
+                continue
+            for dataset in dataset_list:
+                print(f'Plotting t-SNE for {dataset} of {split_name}',
+                      flush=True)
+                dataset_feats = self.load_features(
+                    [f'{dataset}.npz'],
+                    separate=True,
+                    l2_normalize=l2_normalize_feat,
+                    z_normalize=z_normalize_feat)
+                dataset_feats = self.random_sample([dataset_feats],
+                                                   array_names=[dataset],
+                                                   n_samples=n_samples)
+                combined_feats_dict = {**id_feats_dict, dataset: dataset_feats}
+                title_suffix, file_suffix = self.get_title_and_file_suffix(
+                    l2_normalize_feat, z_normalize_feat)
+                title = f't-SNE for{title_suffix} Backbone Features of ' \
+                        f'ID and {dataset} Samples'
+                output_path = os.path.join(
+                    output_dir, f'tsne_features{file_suffix}_{dataset}.svg')
+                self.draw_tsne_plot(combined_feats_dict, title, output_path,
+                                    self.get_label)
+
     def draw(self):
         if 'all' in self.plot_config.types:
             print(f'\n{" Overall ":-^50}', flush=True)
             self.plot_tsne()
         if 'splits' in self.plot_config.types:
-            print(f'\n{" Split ":-^50}', flush=True)
+            print(f'\n{" Splits ":-^50}', flush=True)
             self.plot_tsne_split()
+        if 'datasets' in self.plot_config.types:
+            print(f'\n{" Datasets ":-^50}', flush=True)
+            self.plot_tsne_dataset()

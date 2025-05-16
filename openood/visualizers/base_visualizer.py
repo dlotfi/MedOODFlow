@@ -94,7 +94,10 @@ class BaseVisualizer(ABC):
         keep_ratio_threshold = \
             self.plot_config.score_outlier_removal.keep_ratio_threshold
 
-        if method == 'range':
+        if method == 'none':
+            # No outlier removal
+            best_indices = np.ones(len(scores), dtype=bool)
+        elif method == 'range':
             assert len(keep_range) == 2, 'keep_range must have 2 values'
             keep_range = [
                 np.inf if str(x).lower() == 'inf' else

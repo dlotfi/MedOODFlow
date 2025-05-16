@@ -9,8 +9,43 @@ from openood.utils.vis_comm import save_fig_and_close
 
 class SpectrumVisualizer(BaseVisualizer):
     @staticmethod
+    def get_optimal_bins(data):
+        """Determine optimal number of bins using Freedman-Diaconis rule.
+
+        Formula: bin width = 2 * IQR(x) / (n^(1/3))
+        where IQR is the interquartile range and n is number of observations.
+        """
+        if len(data) == 0:
+            return 10  # Default for empty data
+
+        # Calculate bin width using Freedman-Diaconis rule
+        q75, q25 = np.percentile(data, [75, 25])
+        iqr = q75 - q25
+        n = len(data)
+
+        # Handle potential issues
+        if iqr == 0:
+            # Fall back to Sturges' rule if IQR is 0
+            return int(np.ceil(np.log2(n) + 1))
+
+        bin_width = 2 * iqr / (n**(1 / 3))
+        if bin_width == 0:
+            return int(np.sqrt(n))  # Simple fallback
+
+        data_range = np.max(data) - np.min(data)
+        n_bins = int(np.ceil(data_range / bin_width))
+
+        # Cap at reasonable limits
+        return max(min(n_bins, 100), 5)
+
+    @staticmethod
     def draw_histogram(scores_dict, output_path, title, log_scale, n_bins,
                        label_fn: Callable[[str], str]):
+        if n_bins == 'auto':
+            # Combine all data to determine optimal bins for consistent view
+            all_scores = np.concatenate(list(scores_dict.values()))
+            n_bins = SpectrumVisualizer.get_optimal_bins(all_scores)
+
         plt.figure(figsize=(8, 3), dpi=300)
         for key, scores in scores_dict.items():
             plt.hist(scores,
@@ -36,7 +71,7 @@ class SpectrumVisualizer(BaseVisualizer):
             scores = self.remove_outliers(split_name, scores)
             scores_dict[split_name] = scores
 
-        print('Plotting histogram of log-likelihood', flush=True)
+        print('Plotting log-likelihood histogram', flush=True)
         self.draw_histogram(scores_dict,
                             os.path.join(output_dir, 'spectrum.svg'),
                             'Log-Likelihood for ID and OOD Samples', log_scale,
@@ -52,20 +87,17 @@ class SpectrumVisualizer(BaseVisualizer):
         id_scores_dict = {}
         scores_dict = {}
         for split_name, dataset_list in self.datasets.items():
-            if split_name in self.id_splits:
-                dataset_list = [dataset_list]
             for dataset in dataset_list:
-                dataset = [dataset] if type(dataset) is not list else dataset
-                scores = self.load_scores([f'{d}.npz' for d in dataset])
-                scores = self.remove_outliers(dataset[0], scores)
+                scores = self.load_scores([f'{dataset}.npz'])
+                scores = self.remove_outliers(dataset, scores)
                 if split_name in self.id_splits:
                     id_scores_dict[split_name] = scores
                 else:
-                    scores_dict.setdefault(split_name, {})[dataset[0]] = scores
+                    scores_dict.setdefault(split_name, {})[dataset] = scores
 
-        # Plot spectrum for all pairs of 'id' and one of the other datasets
+        # Plot each split against ID
         for split_name, datasets_scores in scores_dict.items():
-            print(f'Plotting histogram of log-likelihood for {split_name}',
+            print(f'Plotting log-likelihood histogram for {split_name}',
                   flush=True)
             combined_scores_dict = {**id_scores_dict, **datasets_scores}
             self.draw_histogram(
@@ -74,10 +106,46 @@ class SpectrumVisualizer(BaseVisualizer):
                 f'Log-Likelihood for ID and {split_name} Samples', log_scale,
                 n_bins, self.get_dataset_label)
 
+    def plot_spectrum_dataset(self):
+        output_dir = os.path.join(self.config.output_dir, 'dataset_plots')
+        log_scale = self.plot_config.score_log_scale
+        n_bins = self.plot_config.n_bins
+
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Get all ID scores
+        id_scores_dict = {}
+        for split_name in self.id_splits:
+            dataset_list = self.datasets[split_name]
+            scores = self.load_scores([f'{d}.npz' for d in dataset_list])
+            scores = self.remove_outliers(split_name, scores)
+            id_scores_dict[split_name] = scores
+
+        # Plot each dataset against ID
+        for split_name, dataset_list in self.datasets.items():
+            if split_name in self.id_splits:
+                continue
+            for dataset in dataset_list:
+                print(
+                    f'Plotting log-likelihood histograms for '
+                    f'{dataset} dataset of {split_name}',
+                    flush=True)
+                scores = self.load_scores([f'{dataset}.npz'])
+                scores = self.remove_outliers(dataset, scores)
+                combined_scores_dict = {**id_scores_dict, dataset: scores}
+                self.draw_histogram(
+                    combined_scores_dict,
+                    os.path.join(output_dir, f'spectrum_{dataset}.svg'),
+                    f'Log-Likelihood for ID and {dataset} Samples', log_scale,
+                    n_bins, self.get_dataset_label)
+
     def draw(self):
         if 'all' in self.plot_config.types:
             print(f'\n{" Overall ":-^50}', flush=True)
             self.plot_spectrum()
         if 'splits' in self.plot_config.types:
-            print(f'\n{" Split ":-^50}', flush=True)
+            print(f'\n{" Splits ":-^50}', flush=True)
             self.plot_spectrum_split()
+        if 'datasets' in self.plot_config.types:
+            print(f'\n{" Datasets ":-^50}', flush=True)
+            self.plot_spectrum_dataset()
