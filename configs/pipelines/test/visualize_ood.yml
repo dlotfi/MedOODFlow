@@ -30,12 +30,17 @@ visualizer:
       keep_range: [-inf, inf]  # range to keep the scores. only used when method is 'range'
       sigma: 3
       keep_ratio_threshold: 0.5
+    fig_size: [8, 3]
+    no_title: False
   tsne:
     types: [all]
     z_normalize_feat: False  # z-normalize features before t-SNE
     l2_normalize_feat: True  # l2-normalize features before t-SNE
     n_samples: 1000
     feature_splits: []
+    fig_size: [8, 8]
+    point_size: 10
+    no_title: False
   tsne_score:
     types: [all]
     z_normalize_feat: False
@@ -48,3 +53,6 @@ visualizer:
       keep_range: [-inf, inf]
       sigma: 3
       keep_ratio_threshold: 0.5
+    fig_size: [10, 8]
+    point_size: 10
+    no_title: False

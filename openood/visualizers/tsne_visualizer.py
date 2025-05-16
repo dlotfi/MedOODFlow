@@ -89,20 +89,25 @@ class TSNEVisualizer(BaseVisualizer):
             return sampled_array_list[0]
         return tuple(sampled_array_list)
 
-    @staticmethod
-    def draw_tsne_plot(feats_dict: Dict[str, np.array], title, output_path,
-                       label_fn: Callable[[str], str]):
-        plt.figure(figsize=(8, 8), dpi=300)
+    def draw_tsne_plot(self, feats_dict: Dict[str, np.array], title,
+                       output_path, label_fn: Callable[[str], str]):
+        fig_size = (float(self.plot_config.fig_size[0]),
+                    float(self.plot_config.fig_size[1]))
+        point_size = int(self.plot_config.point_size)
+        no_title = self.plot_config.get('no_title', False)
+        plt.figure(figsize=fig_size, dpi=300)
         tsne_feats_dict = TSNEVisualizer._tsne_compute(feats_dict)
         for key, tsne_feats in tsne_feats_dict.items():
             plt.scatter(tsne_feats[:, 0],
                         tsne_feats[:, 1],
-                        s=10,
+                        s=point_size,
                         alpha=0.5,
                         label=label_fn(key))
-        plt.axis('off')
-        plt.legend(loc='upper left', fontsize='small')
-        plt.title(title)
+        plt.xticks([])
+        plt.yticks([])
+        if not no_title:
+            plt.legend(loc='upper left', fontsize='small')
+            plt.title(title)
         save_fig_and_close(output_path)
 
     @staticmethod

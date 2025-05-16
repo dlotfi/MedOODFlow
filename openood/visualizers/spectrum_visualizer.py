@@ -38,32 +38,37 @@ class SpectrumVisualizer(BaseVisualizer):
         # Cap at reasonable limits
         return max(min(n_bins, 100), 5)
 
-    @staticmethod
-    def draw_histogram(scores_dict, output_path, title, log_scale, n_bins,
+    def draw_histogram(self, scores_dict, output_path, title,
                        label_fn: Callable[[str], str]):
+        log_scale = self.plot_config.score_log_scale
+        n_bins = self.plot_config.n_bins
+        fig_size = (float(self.plot_config.fig_size[0]),
+                    float(self.plot_config.fig_size[1]))
+        no_title = self.plot_config.get('no_title', False)
         if n_bins == 'auto':
             # Combine all data to determine optimal bins for consistent view
             all_scores = np.concatenate(list(scores_dict.values()))
             n_bins = SpectrumVisualizer.get_optimal_bins(all_scores)
+        else:
+            n_bins = int(n_bins)
 
-        plt.figure(figsize=(8, 3), dpi=300)
+        plt.figure(figsize=fig_size, dpi=300)
         for key, scores in scores_dict.items():
             plt.hist(scores,
                      n_bins,
                      density=True,
-                     weights=np.ones(len(scores)) / len(scores),
                      alpha=0.5,
                      label=label_fn(key),
                      log=log_scale)
         plt.yticks([])
-        plt.legend(loc='upper left', fontsize='small')
-        plt.title(title)
+        if not no_title:
+            plt.legend(loc='upper left', fontsize='small')
+            plt.title(title)
         save_fig_and_close(output_path)
 
     def plot_spectrum(self):
         output_dir = self.config.output_dir
-        log_scale = self.plot_config.score_log_scale
-        n_bins = self.plot_config.n_bins
+        os.makedirs(output_dir, exist_ok=True)
 
         scores_dict = {}
         for split_name, dataset_list in self.datasets.items():
@@ -74,14 +79,11 @@ class SpectrumVisualizer(BaseVisualizer):
         print('Plotting log-likelihood histogram', flush=True)
         self.draw_histogram(scores_dict,
                             os.path.join(output_dir, 'spectrum.svg'),
-                            'Log-Likelihood for ID and OOD Samples', log_scale,
-                            n_bins, self.get_label)
+                            'Log-Likelihood for ID and OOD Samples',
+                            self.get_label)
 
     def plot_spectrum_split(self):
         output_dir = os.path.join(self.config.output_dir, 'split_plots')
-        log_scale = self.plot_config.score_log_scale
-        n_bins = self.plot_config.n_bins
-
         os.makedirs(output_dir, exist_ok=True)
 
         id_scores_dict = {}
@@ -103,14 +105,11 @@ class SpectrumVisualizer(BaseVisualizer):
             self.draw_histogram(
                 combined_scores_dict,
                 os.path.join(output_dir, f'spectrum_{split_name}.svg'),
-                f'Log-Likelihood for ID and {split_name} Samples', log_scale,
-                n_bins, self.get_dataset_label)
+                f'Log-Likelihood for ID and {split_name} Samples',
+                self.get_dataset_label)
 
     def plot_spectrum_dataset(self):
         output_dir = os.path.join(self.config.output_dir, 'dataset_plots')
-        log_scale = self.plot_config.score_log_scale
-        n_bins = self.plot_config.n_bins
-
         os.makedirs(output_dir, exist_ok=True)
 
         # Get all ID scores
@@ -136,8 +135,8 @@ class SpectrumVisualizer(BaseVisualizer):
                 self.draw_histogram(
                     combined_scores_dict,
                     os.path.join(output_dir, f'spectrum_{dataset}.svg'),
-                    f'Log-Likelihood for ID and {dataset} Samples', log_scale,
-                    n_bins, self.get_dataset_label)
+                    f'Log-Likelihood for ID and {dataset} Samples',
+                    self.get_dataset_label)
 
     def draw(self):
         if 'all' in self.plot_config.types:

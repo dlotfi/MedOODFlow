@@ -9,11 +9,15 @@ from openood.utils.vis_comm import save_fig_and_close, MARKERS
 
 
 class TSNEScoreVisualizer(TSNEVisualizer):
-    @staticmethod
-    def draw_tsne_score_plot(feats_dict, scores_dict, title, output_path,
-                             colored_id, log_scale, id_splits,
-                             label_fn: Callable[[str], str]):
-        plt.figure(figsize=(10, 8), dpi=300)
+    def draw_tsne_score_plot(self, feats_dict, scores_dict, title, output_path,
+                             colored_id, id_splits, label_fn: Callable[[str],
+                                                                       str]):
+        log_scale = self.plot_config.score_log_scale
+        fig_size = (float(self.plot_config.fig_size[0]),
+                    float(self.plot_config.fig_size[1]))
+        point_size = int(self.plot_config.point_size)
+        no_title = self.plot_config.get('no_title', False)
+        plt.figure(figsize=fig_size, dpi=300)
         tsne_feats_dict = TSNEVisualizer._tsne_compute(feats_dict)
         all_scores = np.concatenate(
             [scores for key, scores in scores_dict.items()])
@@ -37,7 +41,7 @@ class TSNEScoreVisualizer(TSNEVisualizer):
             if key in id_splits and not colored_id:
                 plt.scatter(tsne_feats[:, 0],
                             tsne_feats[:, 1],
-                            s=10,
+                            s=point_size,
                             alpha=0.2,
                             marker=marker,
                             label=label_fn(key),
@@ -45,7 +49,7 @@ class TSNEScoreVisualizer(TSNEVisualizer):
             else:
                 plt.scatter(tsne_feats[:, 0],
                             tsne_feats[:, 1],
-                            s=10,
+                            s=point_size,
                             alpha=0.5,
                             marker=marker,
                             label=label_fn(key),
@@ -54,11 +58,13 @@ class TSNEScoreVisualizer(TSNEVisualizer):
                             norm=norm)
         plt.colorbar(mappable=plt.cm.ScalarMappable(norm=norm, cmap=cmap),
                      ax=plt.gca())
-        plt.axis('off')
-        legend = plt.legend(loc='upper left', fontsize='small')
-        for handle in legend.legend_handles:
-            handle.set_color('black')
-        plt.title(title)
+        plt.xticks([])
+        plt.yticks([])
+        if not no_title:
+            legend = plt.legend(loc='upper left', fontsize='small')
+            for handle in legend.legend_handles:
+                handle.set_color('black')
+            plt.title(title)
         save_fig_and_close(output_path)
 
     def plot_tsne_score(self):
@@ -66,7 +72,6 @@ class TSNEScoreVisualizer(TSNEVisualizer):
         l2_normalize_feat = self.plot_config.l2_normalize_feat
         z_normalize_feat = self.plot_config.z_normalize_feat
         colored_id = self.plot_config.colored_id
-        log_scale = self.plot_config.score_log_scale
         n_samples = self.plot_config.n_samples
 
         feats_dict = {}
@@ -92,15 +97,13 @@ class TSNEScoreVisualizer(TSNEVisualizer):
                 'ID and OOD Samples'
         output_path = os.path.join(output_dir, f'tsne_scores{file_suffix}.svg')
         self.draw_tsne_score_plot(feats_dict, scores_dict, title, output_path,
-                                  colored_id, log_scale, self.id_splits,
-                                  self.get_label)
+                                  colored_id, self.id_splits, self.get_label)
 
     def plot_tsne_score_split(self):
         output_dir = os.path.join(self.config.output_dir, 'split_plots')
         l2_normalize_feat = self.plot_config.l2_normalize_feat
         z_normalize_feat = self.plot_config.z_normalize_feat
         colored_id = self.plot_config.colored_id
-        log_scale = self.plot_config.score_log_scale
         n_samples = self.plot_config.n_samples
 
         os.makedirs(output_dir, exist_ok=True)
@@ -145,7 +148,7 @@ class TSNEScoreVisualizer(TSNEVisualizer):
                 f'tsne_features{file_suffix}_scores_{split_name}.svg')
             self.draw_tsne_score_plot(combined_feats_dict,
                                       combined_scores_dict, title, output_path,
-                                      colored_id, log_scale, self.id_splits,
+                                      colored_id, self.id_splits,
                                       self.get_dataset_label)
 
     def draw(self):
