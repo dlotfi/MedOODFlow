@@ -105,6 +105,11 @@ class TSNEVisualizer(BaseVisualizer):
                         label=label_fn(key))
         plt.xticks([])
         plt.yticks([])
+        # Make background of the plot transparent
+        # ax = plt.gca()
+        # ax.patch.set_alpha(0.0)
+        # fig = plt.gcf()
+        # fig.patch.set_alpha(0.0)
         if not no_title:
             plt.legend(loc='upper left', fontsize='small')
             plt.title(title)

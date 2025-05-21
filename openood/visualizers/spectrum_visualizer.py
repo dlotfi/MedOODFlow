@@ -49,6 +49,7 @@ class SpectrumVisualizer(BaseVisualizer):
             # Combine all data to determine optimal bins for consistent view
             all_scores = np.concatenate(list(scores_dict.values()))
             n_bins = SpectrumVisualizer.get_optimal_bins(all_scores)
+            print(f'Optimal number of bins: {n_bins}', flush=True)
         else:
             n_bins = int(n_bins)
 
@@ -61,6 +62,11 @@ class SpectrumVisualizer(BaseVisualizer):
                      label=label_fn(key),
                      log=log_scale)
         plt.yticks([])
+        # Make background of the plot transparent
+        # ax = plt.gca()
+        # ax.patch.set_alpha(0.0)
+        # fig = plt.gcf()
+        # fig.patch.set_alpha(0.0)
         if not no_title:
             plt.legend(loc='upper left', fontsize='small')
             plt.title(title)
