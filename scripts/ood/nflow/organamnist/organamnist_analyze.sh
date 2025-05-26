@@ -14,5 +14,7 @@ python main.py \
     --analyzer.model1_score_dir "./results/organamnist_nflow_test_nflow_ood_nflow_${MARK}/s${SEED}/ood/scores" \
     --analyzer.model2_score_dir "./results/organamnist_resnet18_28x28_test_ood_ood_${METHOD}_default/s${SEED}/ood/scores" \
     --analyzer.ood_splits nearood farood \
+    --analyzer.model_names Ours ${METHOD^^} \
+    --analyzer.bootstrapping.types all splits datasets \
     --seed ${SEED} \
     --mark ${MARK}_${METHOD}
