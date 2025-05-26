@@ -1,13 +1,13 @@
-# MedOODFlow: Enhancing Out-of-Distribution Detection in Medical Imaging with Normalizing Flows
+# MedOODFlow: Out-of-Distribution Detection in Medical Imaging with Normalizing Flows
 
-This repository contains the code for the paper "Enhancing Out-of-Distribution Detection in Medical Imaging with Normalizing Flows"
+This repository contains the code for the paper *"Safeguarding AI in Medical Imaging: Post-Hoc Out-of-Distribution Detection with Normalizing Flows"*
 by [Dariush Lotfi](https://scholar.google.com/citations?user=92-ViGUAAAAJ&hl=en), [Mohammad-Ali Nikouei Mahani](https://scholar.google.com/citations?user=9D3HgLsAAAAJ&hl=en), [Mohamad Koohi-Moghadam](https://scholar.google.com/citations?user=obSQRjAAAAAJ&hl=en), and [Kyongtae Ty Bae](https://scholar.google.com/citations?user=M7Fi-dQAAAAJ&hl=en).
 
 
 ## Abstract
-Out-of-distribution (OOD) detection is a critical challenge in medical imaging, where unexpected data can lead to significant diagnostic errors. This study presents a novel normalizing flow-based method for OOD detection, designed to enhance the reliability of medical imaging systems. Our approach operates post-hoc, ensuring that it can be integrated without altering the weights of pre-trained models. We first evaluate our method using the MedMNIST benchmark dataset, demonstrating its effectiveness. Additionally, we introduce a new OOD benchmark dataset, curated from various public medical image sources, to further validate our approach. Our results indicate that the proposed model accurately detects diverse types of shifts, including population shifts, age shifts, and modality shifts, with high precision. This advancement underscores the potential of normalizing flows in improving the robustness of medical imaging applications.
+In AI-driven medical imaging, the failure to detect out-of-distribution (OOD) data poses a severe risk to clinical reliability, potentially leading to critical diagnostic errors. Current OOD detection methods often demand impractical retraining or modifications to pre-trained models, hindering their adoption in regulated clinical environments. To address this challenge, we propose a post-hoc normalizing flow-based approach that seamlessly integrates with existing pre-trained models without altering their weights. Our evaluation used a novel in-house–built dataset, MedOOD, meticulously curated to simulate clinically relevant distributional shifts, alongside the MedMNIST benchmark dataset. On our in-house MedOOD dataset, our method achieved an AUROC of 84.61%, outperforming state-of-the-art methods like ViM (80.65%) and MDS (80.87%). Similarly, on MedMNIST, it reached an exceptional AUROC of 93.8%, surpassing leading approaches such as ViM (88.08%) and ReAct (87.05%). This superior performance, coupled with its post-hoc integration capability, positions our method as a vital safeguard for enhancing safety in medical imaging workflows.
 
-![MedOODFlow architecture](assets/model_diagram.png)
+<img alt="MedOODFlow overview" src="assets/medoodflow.png" width="900" height="791"/>
 
 ## Based on OpenOOD
 This project is built upon [OpenOOD](https://github.com/Jingkang50/OpenOOD). For more details, you can refer to the original README file [here](OpenOOD_README.md).
@@ -60,7 +60,7 @@ If you find this work useful for your research, please cite our paper.
 
 ```bibtex
 @article{lotfi2025medoodflow,
-  title={Enhancing Out-of-Distribution Detection in Medical Imaging with Normalizing Flows},
+  title={Safeguarding AI in Medical Imaging: Post-Hoc Out-of-Distribution Detection with Normalizing Flows},
   author={Dariush Lotfi and Mohammad-Ali Nikouei Mahani and Mohamad Koohi-Moghadam and Kyongtae Ty Bae},
   journal={arXiv preprint arXiv:2502.11638},
   year={2025}

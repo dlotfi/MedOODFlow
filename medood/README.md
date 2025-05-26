@@ -189,7 +189,7 @@ If you use the MedOOD benchmark in your research, please cite this paper:
 
 ```bibtex
 @article{lotfi2025medoodflow,
-  title={Enhancing Out-of-Distribution Detection in Medical Imaging with Normalizing Flows},
+  title={Safeguarding AI in Medical Imaging: Post-Hoc Out-of-Distribution Detection with Normalizing Flows},
   author={Dariush Lotfi and Mohammad-Ali Nikouei Mahani and Mohamad Koohi-Moghadam and Kyongtae Ty Bae},
   journal={arXiv preprint arXiv:2502.11638},
   year={2025}
