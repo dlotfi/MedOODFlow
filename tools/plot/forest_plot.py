@@ -159,6 +159,9 @@ def plot_forest_chart(csv_file,
                 upper_text = upper_text[:-2]
             if value_text.endswith('.00'):
                 value_text = value_text[:-3]
+            elif '.' in value_text and value_text.endswith(
+                    '0'):  # such as 93.80
+                value_text = value_text[:-1]
 
             # Calculate width of CI
             ci_width = row['CI_Upper'] - row['CI_Lower']
@@ -220,6 +223,8 @@ def plot_forest_chart(csv_file,
 
         # Set x limits to show the full range needed
         plt.xlim(x_min, x_max)
+        # Reduce extra space below the bottom row
+        plt.ylim(min(y_positions) - row_height, max(y_positions) + row_height)
 
         # Ensure x-ticks are within the valid range (0-100)
         xticks = plt.xticks()[0]  # Get current ticks

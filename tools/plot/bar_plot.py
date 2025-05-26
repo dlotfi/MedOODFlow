@@ -43,7 +43,7 @@ def _create_bar_plot(data, metrics, title, file_name, output_dir, ylim, rotate,
 
     # Fixed parameters
     margin_inches = 1.0  # Left/right margins in inches
-    legend_space_inches = 2.0  # Space for legend
+    legend_space_inches = 3  # Increased space for legend + avg labels
     left_padding_inches = 0.125  # Add padding before leftmost group
 
     # Calculate actual width needed for the bars
@@ -91,13 +91,31 @@ def _create_bar_plot(data, metrics, title, file_name, output_dir, ylim, rotate,
 
     # Find maximum height for padding calculation
     max_value = 0
+
+    # Store average values for each metric
+    avg_values = {}
+
     for metric in metrics:
         values = data[metric].values
         current_max = np.max(values) if len(values) > 0 else 0
         max_value = max(max_value, current_max)
+        # Calculate and store average for this metric
+        avg_values[metric] = np.mean(values) if len(values) > 0 else 0
+
+    # Get color cycle from matplotlib
+    prop_cycle = plt.rcParams['axes.prop_cycle']
+    colors = prop_cycle.by_key()['color']
+
+    # Calculate the y-axis limit
+    if not ylim:
+        ylim = max_value
+
+    # Add 15% padding to the top
+    display_max = ylim * 1.15
 
     for i, metric in enumerate(metrics):
         values = data[metric].values
+        metric_color = colors[i % len(colors)]
 
         # Position bars within groups
         bar_positions = group_positions + i * bar_width_data
@@ -106,7 +124,8 @@ def _create_bar_plot(data, metrics, title, file_name, output_dir, ylim, rotate,
                       values,
                       bar_width_data,
                       label=metric,
-                      alpha=0.7)
+                      alpha=0.6,
+                      color=metric_color)
 
         # Add value labels on top of each bar
         for bar_idx, bar in enumerate(bars):
@@ -124,9 +143,46 @@ def _create_bar_plot(data, metrics, title, file_name, output_dir, ylim, rotate,
                     rotation=rotate,
                     fontsize=8,
                     fontweight='bold')
-            # Add border
-            # bar.set_edgecolor('black')
-            # bar.set_linewidth(0.5)
+
+        # Add average line for this metric
+        avg = avg_values[metric]
+        avg_str = f'{avg:.2f}'
+        if avg_str.endswith('.00'):
+            avg_str = avg_str[:-3]
+
+        # Draw horizontal dashed line with matching color
+        x_min = 0
+        total_data_units = group_positions[-1] + group_width_data + \
+            bar_width_data / 2 if num_datasets > 0 else 0
+        ax.hlines(avg,
+                  x_min,
+                  total_data_units,
+                  colors=metric_color,
+                  linestyles='dashed',
+                  alpha=0.4,
+                  linewidth=1.5)
+
+        # Calculate vertical offset for the label to avoid collisions
+        # Each metric gets a different offset position
+        vertical_offset = 0
+        if i > 0:
+            # Check if this avg is close to any previous avg
+            for prev_i in range(i):
+                prev_avg = avg_values[metrics[prev_i]]
+                if abs(avg - prev_avg) < (display_max *
+                                          0.03):  # Within 3% of y-axis range
+                    vertical_offset = (i % 3 - 1) * (
+                        display_max * 0.04)  # Alternate up/down/center
+
+        # Add average value label on the right side with offset
+        ax.text(total_data_units + left_padding_inches,
+                avg + vertical_offset,
+                f'Avg: {avg_str}',
+                va='center',
+                ha='left',
+                color=metric_color,
+                fontsize=8,
+                fontweight='bold')
 
     # Set x-ticks at group centers
     ax.set_title(title, fontsize=14, fontweight='bold')
@@ -141,7 +197,7 @@ def _create_bar_plot(data, metrics, title, file_name, output_dir, ylim, rotate,
     x_min = 0  # Start from 0 to include the left padding
     total_data_units = group_positions[-1] + group_width_data \
         if num_datasets > 0 else 0
-    ax.set_xlim(x_min, total_data_units + 0.125)
+    ax.set_xlim(x_min, total_data_units + left_padding_inches)
 
     # Add alternating background for better readability
     half_gap = bar_width_data / 2
@@ -153,13 +209,6 @@ def _create_bar_plot(data, metrics, title, file_name, output_dir, ylim, rotate,
                        alpha=0.1,
                        color='gray')
 
-    # Calculate the y-axis limit
-    if not ylim:
-        ylim = max_value
-
-    # Add 15% padding to the top
-    display_max = ylim * 1.15
-
     # Set up y-axis
     ax.set_ylim(0, display_max)
     step = ylim / 5
@@ -167,9 +216,15 @@ def _create_bar_plot(data, metrics, title, file_name, output_dir, ylim, rotate,
     yticks = yticks[yticks <= ylim]
     ax.set_yticks(yticks)
 
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
-    ax.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
-
+    ax.grid(axis='y', linestyle='--', alpha=0.6)
+    # Replace the legend positioning code with this cleaner solution
+    # Calculate the right edge of the plot in figure coordinates
+    fig_right_edge = left_margin_ratio + axes_width
+    legend_x = fig_right_edge + 0.1  # Fixed 10% of figure width as padding
+    # Position the legend using figure coordinates instead of axes coordinates
+    ax.legend(loc='center left',
+              bbox_to_anchor=(legend_x, 0.6),
+              bbox_transform=fig.transFigure)
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
 
